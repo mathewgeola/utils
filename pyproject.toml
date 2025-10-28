@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cwb-utils"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["mathewgeola <mathewgeola@gmail.com>"]
 readme = "README.md"
 
@@ -21,6 +21,7 @@ pillow = "^12.0.0"
 pillow-avif-plugin = "^1.5.2"
 pandas = "^2.3.3"
 openpyxl = "^3.1.5"
+arrow = "^1.4.0"
 
 
 [build-system]
