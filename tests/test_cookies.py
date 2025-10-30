@@ -3,7 +3,7 @@ from utils import cookies as _cookies
 
 def test_cookies():
     cookies = {
-        "utils": "hi"
+        "cwb-utils": "hi"
     }
     print(_cookies.dict_to_str(cookies))
 

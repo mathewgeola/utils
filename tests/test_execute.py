@@ -1,4 +1,5 @@
 from utils import execute as _execute
+from utils import logger as _logger
 
 
 def test_execute():
@@ -40,6 +41,12 @@ def test_execute():
 
     result = _execute.js.execute_javascript_by_subprocess(js_code, arguments=(1, 2, "3",))
     print(result["sum"])
+
+    logger = _logger.get_logger(__name__)
+    _execute.cmd.execute_cmd_code_by_subprocess_popen("ping www.baidu.com", "cp936", logger)
+    _execute.cmd.execute_cmd_code_by_subprocess_run("ping www.baidu.com", "cp936", logger)
+    print(_execute.cmd.execute_cmd_code_by_subprocess_popen("pip show cwb-utils", "cp936", logger))
+    print(_execute.cmd.execute_cmd_code_by_subprocess_popen("pip show frida", "cp936", logger))
 
 
 if __name__ == '__main__':

@@ -27,7 +27,7 @@ class _url:
     @staticmethod
     def get_origin_path(url: str) -> str:
         """
-        >>> _url.get_origin_path("https://github.com/search?q=owner%3Amathewgeola+utils&type=repositories")
+        >>> _url.get_origin_path("https://github.com/search?q=owner%3Amathewgeola+cwb-utils&type=repositories")
         'https://github.com/search'
 
         Args:
@@ -166,8 +166,8 @@ class _url:
     @staticmethod
     def join_url(base_url: str, url: str) -> str:
         """
-        >>> _url.join_url("https://www.baidu.com/", "/s?ie=UTF-8&wd=utils")
-        'https://www.baidu.com/s?ie=UTF-8&wd=utils'
+        >>> _url.join_url("https://www.baidu.com/", "/s?ie=UTF-8&wd=cwb-utils")
+        'https://www.baidu.com/s?ie=UTF-8&wd=cwb-utils'
 
         Args:
             base_url:
@@ -201,8 +201,8 @@ class _url:
     @staticmethod
     def get_params(url: str) -> dict[str, str]:
         """
-        >>> _url.get_params("https://www.baidu.com/s?wd=utils")
-        {'wd': 'utils'}
+        >>> _url.get_params("https://www.baidu.com/s?wd=cwb-utils")
+        {'wd': 'cwb-utils'}
 
         Args:
             url:
@@ -217,8 +217,8 @@ class _url:
     @staticmethod
     def get_param(url: str, key: str, default: Any | None = None) -> Any:
         """
-        >>> _url.get_param("https://www.baidu.com/s?wd=utils", "wd")
-        'utils'
+        >>> _url.get_param("https://www.baidu.com/s?wd=cwb-utils", "wd")
+        'cwb-utils'
 
         Args:
             url:
@@ -235,8 +235,8 @@ class _url:
     @staticmethod
     def get_url_params(url: str) -> tuple[str, dict[str, str]]:
         """
-        >>> _url.get_url_params("https://www.baidu.com/s?wd=utils")
-        ('https://www.baidu.com/s', {'wd': 'utils'})
+        >>> _url.get_url_params("https://www.baidu.com/s?wd=cwb-utils")
+        ('https://www.baidu.com/s', {'wd': 'cwb-utils'})
 
         Args:
             url:
@@ -261,7 +261,7 @@ class _url:
     @staticmethod
     def get_domain(url: str) -> str:
         """
-        >>> _url.get_domain("https://image.baidu.com/search/index?word=utils")
+        >>> _url.get_domain("https://image.baidu.com/search/index?word=cwb-utils")
         'baidu'
 
         Args:
@@ -277,7 +277,7 @@ class _url:
     @staticmethod
     def get_subdomain(url: str) -> str:
         """
-        >>> _url.get_subdomain("https://image.baidu.com/search/index?word=utils")
+        >>> _url.get_subdomain("https://image.baidu.com/search/index?word=cwb-utils")
         'image'
 
         Args:
@@ -293,8 +293,8 @@ class _url:
     @staticmethod
     def canonicalize(url: str) -> str:
         """
-        >>> _url.canonicalize("https://www.baidu.com/s?wd=utils")
-        'https://www.baidu.com/s?wd=utils'
+        >>> _url.canonicalize("https://www.baidu.com/s?wd=cwb-utils")
+        'https://www.baidu.com/s?wd=cwb-utils'
 
         Args:
             url:
