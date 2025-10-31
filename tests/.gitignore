@@ -1,5 +1,7 @@
 *.jpg
 *.log
 *.zip
+*.rar
 
-tests/
+test_file1/
+test_file2/

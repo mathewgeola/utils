@@ -1,49 +1,62 @@
 import os
 import platform
+import subprocess
 import zipfile
 from typing import Literal, cast
 
+from utils._assets import _assets
+
 
 class _file:
-    COMPRESS_TYPE = Literal["zip"]
+    COMPRESS_TYPE = Literal["zip", "rar"]
+    DECOMPRESS_TYPE = Literal["zip", "rar"]
 
     @staticmethod
     def compress(
             dir_path: str,
-            compress_file_path: str | None = None,
-            compress_type: COMPRESS_TYPE = "zip"
+            compress_type: COMPRESS_TYPE | None = None
     ) -> str | None:
         dir_path = os.path.abspath(dir_path)
         if not os.path.isdir(dir_path):
             return None
 
-        if compress_file_path is None:
-            compress_file_path = os.path.join(
-                os.path.dirname(dir_path), os.path.basename(dir_path) + "." + compress_type
-            )
-        else:
-            compress_file_path = os.path.abspath(compress_file_path)
+        if compress_type is None:
+            compress_type = "zip"
+
+        compress_file_path = os.path.join(
+            os.path.dirname(dir_path), os.path.basename(dir_path) + "." + compress_type
+        )
 
         if compress_type == "zip":
             with zipfile.ZipFile(compress_file_path, "w", zipfile.ZIP_DEFLATED) as zf:
                 for root, dirs, files in os.walk(dir_path):
                     for file in files:
                         file_path = os.path.join(root, file)
-
                         if os.path.abspath(file_path) == compress_file_path:
                             continue
-
                         rel_file_path = os.path.relpath(file_path, dir_path)
                         zf.write(file_path, arcname=rel_file_path)
             return compress_file_path
+
+        if compress_type == "rar":
+            args = [
+                _assets.get_assets_file_path("Rar.exe"),
+                "a",
+                "-r",
+                "-inul",
+                "-ep1",
+                compress_file_path,
+                os.path.join(dir_path, "*")
+            ]
+            if subprocess.run(args).returncode == 0:
+                return compress_file_path
 
         return None
 
     @staticmethod
     def decompress(
             compress_file_path: str,
-            dir_path: str | None = None,
-            compress_type: COMPRESS_TYPE = "zip"
+            dir_path: str | None = None
     ) -> str | None:
         compress_file_path = os.path.abspath(compress_file_path)
         if not os.path.isfile(compress_file_path):
@@ -56,10 +69,32 @@ class _file:
 
         os.makedirs(dir_path, exist_ok=True)
 
-        if compress_type == "zip":
+        with open(compress_file_path, "rb") as file:
+            data = file.read(8)
+        text = data.hex()
+        if text == "504b030414000000":
+            decompress_type = "zip"
+        elif text == "526172211a070100":
+            decompress_type = "rar"
+        else:
+            return None
+
+        if decompress_type == "zip":
             with zipfile.ZipFile(compress_file_path, "r") as zf:
                 zf.extractall(dir_path)
             return dir_path
+
+        if decompress_type == "rar":
+            args = [
+                _assets.get_assets_file_path("UnRAR.exe"),
+                "x",
+                "-o+",
+                "-inul",
+                compress_file_path,
+                dir_path
+            ]
+            if subprocess.run(args).returncode == 0:
+                return dir_path
 
         return None
 

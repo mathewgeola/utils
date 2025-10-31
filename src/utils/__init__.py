@@ -1,4 +1,5 @@
 from .__string import _string as string
+from ._assets import _assets as assets
 from ._cookies import _cookies as cookies
 from ._datetime import _datetime as datetime
 from ._execute import _execute as execute
@@ -17,6 +18,7 @@ from ._validators import _validators as validators
 
 __all__ = [
     "string",
+    "assets",
     "cookies",
     "datetime",
     "execute",
