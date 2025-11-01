@@ -1,4 +1,5 @@
 import os
+import sys
 import platform
 import subprocess
 import zipfile
@@ -8,6 +9,9 @@ from utils._assets import _assets
 
 
 class _file:
+    """
+    https://www.rarlab.com/download.htm
+    """
     COMPRESS_TYPE = Literal["zip", "rar"]
     DECOMPRESS_TYPE = Literal["zip", "rar"]
 
@@ -39,8 +43,16 @@ class _file:
             return compress_file_path
 
         if compress_type == "rar":
+            if sys.platform.startswith("win"):
+                x = _assets.get_assets_file_path("win/Rar.exe")
+            elif sys.platform == "darwin":
+                x = _assets.get_assets_file_path("mac/rar")
+            elif sys.platform.startswith("linux"):
+                x = _assets.get_assets_file_path("linux/rar")
+            else:
+                return None
             args = [
-                _assets.get_assets_file_path("Rar.exe"),
+                x,
                 "a",
                 "-r",
                 "-inul",
@@ -85,8 +97,16 @@ class _file:
             return dir_path
 
         if decompress_type == "rar":
+            if sys.platform.startswith("win"):
+                x = _assets.get_assets_file_path("win/UnRAR.exe")
+            elif sys.platform == "darwin":
+                x = _assets.get_assets_file_path("mac/unrar")
+            elif sys.platform.startswith("linux"):
+                x = _assets.get_assets_file_path("linux/unrar")
+            else:
+                return None
             args = [
-                _assets.get_assets_file_path("UnRAR.exe"),
+                x,
                 "x",
                 "-o+",
                 "-inul",
