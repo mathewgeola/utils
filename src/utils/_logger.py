@@ -67,9 +67,9 @@ class _logger:
             self.stream = self._open()
 
         def _format_backup_filename(self, index: int) -> str:
-            base, ext = os.path.splitext(self.baseFilename)
+            root, ext = os.path.splitext(self.baseFilename)
             padded = str(index).zfill(self._zero_padding)
-            return f"{base}.{padded}{ext}"
+            return f"{root}.{padded}{ext}"
 
     @staticmethod
     def _set_console_handler(

@@ -16,21 +16,18 @@ class _image:
             keep_original: bool = False
     ) -> str | None:
         try:
-            image_file_path_p = Path(image_file_path).absolute()
-            image_file_path = str(image_file_path_p)
-
-            if jpg_file_path is None:
-                jpg_file_path_p = image_file_path_p.parent / (image_file_path_p.stem + ".jpg")
+            image_file_path = os.path.abspath(image_file_path)
+            if jpg_file_path:
+                jpg_file_path = os.path.abspath(jpg_file_path)
             else:
-                jpg_file_path_p = Path(jpg_file_path).absolute()
-            jpg_file_path = str(jpg_file_path_p)
+                root, _ = os.path.splitext(image_file_path)
+                jpg_file_path = root + ".jpg"
 
             if image_file_path == jpg_file_path:
                 return jpg_file_path
 
-            jpg_dir_path_p = jpg_file_path_p.parent
-            jpg_dir_path = str(jpg_dir_path_p)
-            jpg_dir_path_p.mkdir(parents=True, exist_ok=True)
+            jpg_dir_path = os.path.dirname(jpg_file_path)
+            os.makedirs(jpg_dir_path, exist_ok=True)
 
             with Image.open(image_file_path) as image:
                 if image.mode in ("RGBA", "LA"):
@@ -51,8 +48,7 @@ class _image:
                 os.replace(temp_file_path, jpg_file_path)
 
             if not keep_original:
-                p = Path(image_file_path)
-                if p.exists() and str(p.resolve()) == str(p.absolute()):
+                if (p := Path(image_file_path)).exists() and str(p.resolve()) == str(p.absolute()):
                     os.remove(image_file_path)
 
             return jpg_file_path
