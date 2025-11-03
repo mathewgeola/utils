@@ -1,20 +1,17 @@
 import inspect
 import os
+from pathlib import Path
 
 
 class _assets:
     @staticmethod
-    def get_assets_file_path(rel_file_path: str) -> str:
-        _src_dir_path = os.path.splitext(os.path.abspath(__file__))[0]
+    def get_assets_file_path(path: str) -> str:
+        assets_dir_path_p = Path(__file__).absolute().parent / Path(__file__).absolute().stem
+        caller_dir_path_p = Path(inspect.stack()[1].filename).parent / Path(inspect.stack()[1].filename).stem
 
-        stack = inspect.stack()
-        caller_frame = stack[1]
-        _dest_dir_path = os.path.splitext(os.path.abspath(caller_frame.filename))[0]
-        _rel_dir_path = os.path.relpath(_dest_dir_path, _src_dir_path).lstrip(os.path.pardir + os.path.sep)
-
-        dir_path = os.path.join(_src_dir_path, _rel_dir_path)
-        file_path = os.path.join(dir_path, rel_file_path)
-        return file_path
+        mid_dir_path = os.path.relpath(caller_dir_path_p, assets_dir_path_p).lstrip(os.path.pardir + os.path.sep)
+        assets_file_path = str(assets_dir_path_p / mid_dir_path / path)
+        return assets_file_path
 
 
 __all__ = [

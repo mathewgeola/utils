@@ -1,8 +1,9 @@
 import os
-import sys
 import platform
 import subprocess
+import sys
 import zipfile
+from pathlib import Path
 from typing import Literal, cast
 
 from utils._assets import _assets
@@ -17,38 +18,45 @@ class _file:
 
     @staticmethod
     def compress(
-            dir_path: str,
-            compress_type: COMPRESS_TYPE | None = None
+            path: str,
+            compress_type: COMPRESS_TYPE | None = None,
+            compress_file_path: str | None = None
     ) -> str | None:
-        dir_path = os.path.abspath(dir_path)
-        if not os.path.isdir(dir_path):
-            return None
+        path_p = Path(path).absolute()
+        path = str(path_p)
 
-        if compress_type is None:
-            compress_type = "zip"
-
-        compress_file_path = os.path.join(
-            os.path.dirname(dir_path), os.path.basename(dir_path) + "." + compress_type
-        )
+        if compress_file_path:
+            compress_file_path_p = Path(compress_file_path).absolute()
+            compress_file_path = str(compress_file_path_p)
+            if compress_type is None:
+                compress_type = compress_file_path_p.suffix[1:]
+        else:
+            if compress_type is None:
+                compress_type = "zip"
+            compress_file_path_p = path_p.parent / (path_p.stem + ("." + compress_type))
+            compress_file_path = str(compress_file_path_p)
 
         if compress_type == "zip":
             with zipfile.ZipFile(compress_file_path, "w", zipfile.ZIP_DEFLATED) as zf:
-                for root, dirs, files in os.walk(dir_path):
-                    for file in files:
-                        file_path = os.path.join(root, file)
-                        if os.path.abspath(file_path) == compress_file_path:
-                            continue
-                        rel_file_path = os.path.relpath(file_path, dir_path)
-                        zf.write(file_path, arcname=rel_file_path)
+                if path_p.is_dir():
+                    for root, dirs, files in os.walk(path):
+                        for file in files:
+                            if (file_path := os.path.join(root, file)) == compress_file_path:
+                                continue
+                            rel_file_path = os.path.relpath(file_path, path)
+                            zf.write(file_path, arcname=rel_file_path)
+                else:
+                    rel_file_path = path_p.stem
+                    zf.write(path, arcname=rel_file_path)
             return compress_file_path
 
         if compress_type == "rar":
             if sys.platform.startswith("win"):
-                x = _assets.get_assets_file_path("win/Rar.exe")
+                x = _assets.get_assets_file_path(str(Path("win") / "Rar.exe"))
             elif sys.platform == "darwin":
-                x = _assets.get_assets_file_path("mac/rar")
+                x = _assets.get_assets_file_path(str(Path("mac") / "rar"))
             elif sys.platform.startswith("linux"):
-                x = _assets.get_assets_file_path("linux/rar")
+                x = _assets.get_assets_file_path(str(Path("linux") / "rar"))
             else:
                 return None
             args = [
@@ -58,8 +66,11 @@ class _file:
                 "-inul",
                 "-ep1",
                 compress_file_path,
-                os.path.join(dir_path, "*")
             ]
+            if path_p.is_dir():
+                args.append(str(path_p / "*"))
+            else:
+                args.append(path)
             if subprocess.run(args).returncode == 0:
                 return compress_file_path
 
@@ -68,18 +79,20 @@ class _file:
     @staticmethod
     def decompress(
             compress_file_path: str,
-            dir_path: str | None = None
+            path: str | None = None
     ) -> str | None:
-        compress_file_path = os.path.abspath(compress_file_path)
         if not os.path.isfile(compress_file_path):
             return None
 
-        if dir_path is None:
-            dir_path = os.path.splitext(compress_file_path)[0]
-        else:
-            dir_path = os.path.abspath(dir_path)
+        compress_file_path_p = Path(compress_file_path).absolute()
+        compress_file_path = str(compress_file_path_p)
 
-        os.makedirs(dir_path, exist_ok=True)
+        if path:
+            path_p = Path(path).absolute()
+        else:
+            path_p = compress_file_path_p.parent
+        path = str(path_p)
+        path_p.mkdir(parents=True, exist_ok=True)
 
         with open(compress_file_path, "rb") as file:
             data = file.read(8)
@@ -93,16 +106,16 @@ class _file:
 
         if decompress_type == "zip":
             with zipfile.ZipFile(compress_file_path, "r") as zf:
-                zf.extractall(dir_path)
-            return dir_path
+                zf.extractall(path)
+            return path
 
         if decompress_type == "rar":
             if sys.platform.startswith("win"):
-                x = _assets.get_assets_file_path("win/UnRAR.exe")
+                x = _assets.get_assets_file_path(str(Path("win") / "UnRAR.exe"))
             elif sys.platform == "darwin":
-                x = _assets.get_assets_file_path("mac/unrar")
+                x = _assets.get_assets_file_path(str(Path("mac") / "unrar"))
             elif sys.platform.startswith("linux"):
-                x = _assets.get_assets_file_path("linux/unrar")
+                x = _assets.get_assets_file_path(str(Path("linux") / "unrar"))
             else:
                 return None
             args = [
@@ -111,10 +124,10 @@ class _file:
                 "-o+",
                 "-inul",
                 compress_file_path,
-                dir_path
+                path
             ]
             if subprocess.run(args).returncode == 0:
-                return dir_path
+                return path
 
         return None
 
@@ -123,8 +136,7 @@ class _file:
         file_paths = []
         dir_paths = []
 
-        path = os.path.abspath(path)
-
+        path = str(Path(path).absolute())
         with os.scandir(path) as entries:
             for entry in entries:
                 System = Literal["Windows", "Linux", "Darwin"]

@@ -16,16 +16,21 @@ class _image:
             keep_original: bool = False
     ) -> str | None:
         try:
+            image_file_path_p = Path(image_file_path).absolute()
+            image_file_path = str(image_file_path_p)
+
             if jpg_file_path is None:
-                image_file_prefix, _ = os.path.splitext(image_file_path)
-                jpg_file_path = image_file_prefix + ".jpg"
+                jpg_file_path_p = image_file_path_p.parent / (image_file_path_p.stem + ".jpg")
+            else:
+                jpg_file_path_p = Path(jpg_file_path).absolute()
+            jpg_file_path = str(jpg_file_path_p)
 
             if image_file_path == jpg_file_path:
                 return jpg_file_path
 
-            jpg_dir_path = os.path.dirname(jpg_file_path)
-            if not os.path.exists(jpg_dir_path):
-                os.makedirs(jpg_dir_path, exist_ok=True)
+            jpg_dir_path_p = jpg_file_path_p.parent
+            jpg_dir_path = str(jpg_dir_path_p)
+            jpg_dir_path_p.mkdir(parents=True, exist_ok=True)
 
             with Image.open(image_file_path) as image:
                 if image.mode in ("RGBA", "LA"):
