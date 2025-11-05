@@ -8,7 +8,7 @@ class _cookies:
 
     @staticmethod
     def str_to_dict(cookies_str: str) -> dict[str, str]:
-        return {i.split("=")[0].strip(): i.split("=")[-1].strip() for i in cookies_str.split(";")}
+        return {i.split("=")[0].strip(): i.split("=")[-1].strip() for i in cookies_str.split(";") if "=" in i}
 
     @staticmethod
     def dict_to_str(cookies_dict: dict[str, str]) -> str:

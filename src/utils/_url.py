@@ -7,6 +7,7 @@ from urllib import parse
 import httpx
 import tldextract
 from furl import furl
+from tqdm import tqdm
 from typing_extensions import Literal
 from w3lib.url import canonicalize_url
 
@@ -314,7 +315,8 @@ class _url:
             file_prefix: str | None = None,
             file_suffix: str | None = None,
             use_cache: bool = True,
-            chunk_size: int = 64 * 1024
+            chunk_size: int = 64 * 1024,
+            use_tqdm: bool = False
     ) -> str | None:
         if not _url.is_valid(url):
             return None
@@ -365,9 +367,28 @@ class _url:
             with httpx.Client(timeout=None, follow_redirects=True) as client:
                 with client.stream("GET", url, headers=headers) as response:
                     response.raise_for_status()
+
+                    total = int(response.headers.get("content-length", 0))
+                    progress: tqdm | None = None
+
+                    if use_tqdm:
+                        progress = tqdm(
+                            total=total,
+                            unit="B",
+                            unit_scale=True,
+                            unit_divisor=1024,
+                            desc=file_path.split("/")[-1],
+                            bar_format="{l_bar}{bar} | {n_fmt}/{total_fmt} | {rate_fmt} | ETA {remaining}",
+                        )
+
                     with open(file_path, "wb") as file:
                         for chunk in response.iter_bytes(chunk_size=chunk_size):
                             file.write(chunk)
+                            if progress is not None:
+                                progress.update(len(chunk))
+
+                    if progress is not None:
+                        progress.close()
         except Exception as e:  # noqa
             file_path = None
 

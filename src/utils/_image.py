@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 import pillow_avif  # type: ignore
@@ -20,8 +19,7 @@ class _image:
             if jpg_file_path:
                 jpg_file_path = os.path.abspath(jpg_file_path)
             else:
-                root, _ = os.path.splitext(image_file_path)
-                jpg_file_path = root + ".jpg"
+                jpg_file_path = os.path.splitext(image_file_path)[0] + ".jpg"
 
             if image_file_path == jpg_file_path:
                 return jpg_file_path
@@ -48,6 +46,7 @@ class _image:
                 os.replace(temp_file_path, jpg_file_path)
 
             if not keep_original:
+                from pathlib import Path
                 if (p := Path(image_file_path)).exists() and str(p.resolve()) == str(p.absolute()):
                     os.remove(image_file_path)
 

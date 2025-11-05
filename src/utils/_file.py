@@ -97,10 +97,12 @@ class _file:
         with open(compress_file_path, "rb") as file:
             data = file.read(8)
         text = data.hex()
-        if text == "504b030414000000":
+        if text in ("504b030414000000",):
             decompress_type = "zip"
-        elif text == "526172211a070100":
+        elif text in ("526172211a070100", "526172211a0700cf"):
             decompress_type = "rar"
+        elif text in ('377abcaf271c0004',):
+            decompress_type = "7z"
         else:
             return None
 
