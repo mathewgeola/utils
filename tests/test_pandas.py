@@ -1,12 +1,12 @@
 import pandas as pd
 
-from utils import pandas as _pandas
+import utils
 
 
 def test_pandas():
     df = pd.DataFrame({"A": range(1, 101), "B": range(101, 201)})
-    dfs = _pandas.split(df, num_parts=2)
-    # dfs = _pandas.split(df, part_size=50)
+    dfs = utils.pandas.split(df, num_parts=2)
+    dfs = utils.pandas.split(df, part_size=50)
     for df in dfs:
         print(df)
 

@@ -3,7 +3,6 @@ import platform
 import subprocess
 import sys
 import zipfile
-from pathlib import Path
 from typing import Literal, cast
 
 from utils._assets import _assets
@@ -11,10 +10,16 @@ from utils._assets import _assets
 
 class _file:
     """
-    https://www.rarlab.com/download.htm
+    rar
+        https://www.rarlab.com/download.htm
+
+    7z
+        Windows: https://www.7-zip.org/a/7zr.exe
+        Darwin: https://www.7-zip.org/a/7z2501-mac.tar.xz
+        Linux: https://www.7-zip.org/a/7z2501-linux-x64.tar.xz
     """
-    COMPRESS_TYPE = Literal["zip", "rar"]
-    DECOMPRESS_TYPE = Literal["zip", "rar"]
+    COMPRESS_TYPE = Literal["zip", "rar", "7z"]
+    DECOMPRESS_TYPE = Literal["zip", "rar", "7z"]
 
     @staticmethod
     def compress(
@@ -22,23 +27,22 @@ class _file:
             compress_type: COMPRESS_TYPE | None = None,
             compress_file_path: str | None = None
     ) -> str | None:
-        path_p = Path(path).absolute()
-        path = str(path_p)
+        path = os.path.abspath(path)
 
-        if compress_file_path:
-            compress_file_path_p = Path(compress_file_path).absolute()
-            compress_file_path = str(compress_file_path_p)
+        if compress_file_path is not None:
+            compress_file_path = os.path.abspath(compress_file_path)
             if compress_type is None:
-                compress_type = compress_file_path_p.suffix[1:]
+                compress_type = os.path.splitext(compress_file_path)[-1][1:]
         else:
             if compress_type is None:
                 compress_type = "zip"
-            compress_file_path_p = path_p.parent / (path_p.stem + ("." + compress_type))
-            compress_file_path = str(compress_file_path_p)
+            compress_file_path = os.path.join(
+                os.path.dirname(path), os.path.basename(path) + os.extsep + compress_type
+            )
 
         if compress_type == "zip":
             with zipfile.ZipFile(compress_file_path, "w", zipfile.ZIP_DEFLATED) as zf:
-                if path_p.is_dir():
+                if os.path.isdir(path):
                     for root, dirs, files in os.walk(path):
                         for file in files:
                             if (file_path := os.path.join(root, file)) == compress_file_path:
@@ -46,17 +50,17 @@ class _file:
                             rel_file_path = os.path.relpath(file_path, path)
                             zf.write(file_path, arcname=rel_file_path)
                 else:
-                    rel_file_path = path_p.stem
+                    rel_file_path = os.path.basename(path)
                     zf.write(path, arcname=rel_file_path)
             return compress_file_path
 
         if compress_type == "rar":
             if sys.platform.startswith("win"):
-                x = _assets.get_assets_file_path(str(Path("win") / "Rar.exe"))
+                x = _assets.get_assets_file_path(f"win{os.sep}Rar.exe")
             elif sys.platform == "darwin":
-                x = _assets.get_assets_file_path(str(Path("mac") / "rar"))
+                x = _assets.get_assets_file_path(f"mac{os.sep}rar")
             elif sys.platform.startswith("linux"):
-                x = _assets.get_assets_file_path(str(Path("linux") / "rar"))
+                x = _assets.get_assets_file_path(f"linux{os.sep}rar")
             else:
                 return None
             args = [
@@ -65,12 +69,34 @@ class _file:
                 "-r",
                 "-inul",
                 "-ep1",
-                compress_file_path,
+                compress_file_path
             ]
-            if path_p.is_dir():
-                args.append(str(path_p / "*"))
+            if os.path.isdir(path):
+                args.append(f"{path}{os.sep}*")
             else:
                 args.append(path)
+            if subprocess.run(args).returncode == 0:
+                return compress_file_path
+
+        if compress_type == "7z":
+            if sys.platform.startswith("win"):
+                x = _assets.get_assets_file_path(f"win{os.sep}7zr.exe")
+            elif sys.platform == "darwin":
+                x = _assets.get_assets_file_path(f"mac{os.sep}7zz")
+            elif sys.platform.startswith("linux"):
+                x = _assets.get_assets_file_path(f"linux{os.sep}7zz")
+            else:
+                return None
+            args = [
+                x,
+                "a",
+                compress_file_path
+            ]
+            if os.path.isdir(path):
+                args.append(f"{path}{os.sep}*")
+            else:
+                args.append(path)
+            args.extend("-bb0 -bso0 -bsp0 -bse0".split())
             if subprocess.run(args).returncode == 0:
                 return compress_file_path
 
@@ -81,18 +107,15 @@ class _file:
             compress_file_path: str,
             path: str | None = None
     ) -> str | None:
+        compress_file_path = os.path.abspath(compress_file_path)
         if not os.path.isfile(compress_file_path):
             return None
 
-        compress_file_path_p = Path(compress_file_path).absolute()
-        compress_file_path = str(compress_file_path_p)
-
-        if path:
-            path_p = Path(path).absolute()
+        if path is not None:
+            path = os.path.abspath(path)
         else:
-            path_p = compress_file_path_p.parent
-        path = str(path_p)
-        path_p.mkdir(parents=True, exist_ok=True)
+            path = os.path.dirname(compress_file_path)
+        os.makedirs(path, exist_ok=True)
 
         with open(compress_file_path, "rb") as file:
             data = file.read(8)
@@ -113,11 +136,11 @@ class _file:
 
         if decompress_type == "rar":
             if sys.platform.startswith("win"):
-                x = _assets.get_assets_file_path(str(Path("win") / "UnRAR.exe"))
+                x = _assets.get_assets_file_path(f"win{os.sep}UnRAR.exe")
             elif sys.platform == "darwin":
-                x = _assets.get_assets_file_path(str(Path("mac") / "unrar"))
+                x = _assets.get_assets_file_path(f"mac{os.sep}unrar")
             elif sys.platform.startswith("linux"):
-                x = _assets.get_assets_file_path(str(Path("linux") / "unrar"))
+                x = _assets.get_assets_file_path(f"linux{os.sep}unrar")
             else:
                 return None
             args = [
@@ -131,6 +154,26 @@ class _file:
             if subprocess.run(args).returncode == 0:
                 return path
 
+        if decompress_type == "7z":
+            if sys.platform.startswith("win"):
+                x = _assets.get_assets_file_path(f"win{os.sep}7zr.exe")
+            elif sys.platform == "darwin":
+                x = _assets.get_assets_file_path(f"mac{os.sep}7zz")
+            elif sys.platform.startswith("linux"):
+                x = _assets.get_assets_file_path(f"linux{os.sep}7zz")
+            else:
+                return None
+            args = [
+                x,
+                "x",
+                compress_file_path,
+                f"-o{path}",
+                "-y"
+            ]
+            args.extend("-bb0 -bso0 -bsp0 -bse0".split())
+            if subprocess.run(args).returncode == 0:
+                return path
+
         return None
 
     @staticmethod
@@ -138,7 +181,7 @@ class _file:
         file_paths = []
         dir_paths = []
 
-        path = str(Path(path).absolute())
+        path = os.path.abspath(path)
         with os.scandir(path) as entries:
             for entry in entries:
                 System = Literal["Windows", "Linux", "Darwin"]

@@ -2,8 +2,11 @@
 *.log
 *.zip
 *.rar
+*.7z
 
 test_file1/
 test_file2/
+test_file3/
 .gitignore1/
 .gitignore2/
+.gitignore3/

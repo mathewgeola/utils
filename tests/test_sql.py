@@ -1,8 +1,8 @@
-from utils import sql as _sql
+import utils
 
 
 def test_sql():
-    print(_sql.format("select * from table;"))  # noqa
+    print(utils.sql.format("select * from table;"))  # noqa
 
 
 if __name__ == '__main__':

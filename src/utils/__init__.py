@@ -3,7 +3,6 @@ from ._assets import _assets as assets
 from ._cookies import _cookies as cookies
 from ._datetime import _datetime as datetime
 from ._execute import _execute as execute
-from ._ffmpeg import _ffmpeg as ffmpeg
 from ._file import _file as file
 from ._headers import _headers as headers
 from ._html import _html as html
@@ -23,7 +22,6 @@ __all__ = [
     "cookies",
     "datetime",
     "execute",
-    "ffmpeg",
     "file",
     "headers",
     "html",

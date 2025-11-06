@@ -1,9 +1,9 @@
-from utils import types as _types
+import utils
 
 
 def test_types():
     class Base(
-        metaclass=_types.create_subclasscheck_meta_class(
+        metaclass=utils.types.create_subclasscheck_meta_class(
             required_all_methods=("open", "close"),
             required_any_methods=("run",)
         )

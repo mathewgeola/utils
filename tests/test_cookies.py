@@ -1,11 +1,11 @@
-from utils import cookies as _cookies
+import utils
 
 
 def test_cookies():
     cookies = {
         "cwb-utils": "hi"
     }
-    print(_cookies.dict_to_str(cookies))
+    print(utils.cookies.dict_to_str(cookies))
 
 
 if __name__ == '__main__':

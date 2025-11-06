@@ -1,9 +1,9 @@
-from utils import logger as _logger
+import utils
 
 
 def test_logger():
-    logger = _logger.logger
-    logger = _logger.get_logger(__name__, to_console=True, to_file=True, file_max_bytes=10, file_backup_count=3)
+    logger = utils.logger.logger
+    logger = utils.logger.get_logger(__name__, to_console=True, to_file=True, file_max_bytes=10, file_backup_count=3)
 
     logger.debug("debug message")
     logger.info("info message")
