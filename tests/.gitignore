@@ -3,6 +3,7 @@
 *.zip
 *.rar
 *.7z
+*.iso
 
 test_file1/
 test_file2/
@@ -10,3 +11,5 @@ test_file3/
 .gitignore1/
 .gitignore2/
 .gitignore3/
+
+test_image/
