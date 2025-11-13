@@ -1,5 +1,6 @@
 import os
 from tempfile import NamedTemporaryFile
+from typing import Literal
 
 import pillow_avif  # type: ignore
 from PIL import Image
@@ -60,6 +61,64 @@ class _image:
             return jpg_file_path
         except Exception as e:  # noqa
             return None
+
+    @staticmethod
+    def concat(
+            input_image_file_paths: list[str],
+            output_image_file_path: str,
+            orientation: Literal["vertical", "horizontal"] = "vertical",
+            output_image_vertical_width: int | float | None = None,
+            output_image_horizontal_height: int | float | None = None
+    ) -> bool:
+        try:
+            input_images = [Image.open(i) for i in input_image_file_paths]
+
+            if orientation == "vertical":
+                if output_image_vertical_width is None:
+                    output_image_vertical_width = min(i.width for i in input_images)
+
+                resized_images = [
+                    i.resize((output_image_vertical_width, int(i.height * output_image_vertical_width / i.width)))
+                    for i in input_images
+                ]
+
+                output_image_height = sum(i.height for i in resized_images)
+
+                output_image = Image.new("RGB", (output_image_vertical_width, output_image_height), "white")
+
+                y_offset = 0
+                for image in resized_images:
+                    output_image.paste(image, (0, y_offset))
+                    y_offset += image.height
+
+                output_image.save(output_image_file_path)
+
+            elif orientation == "horizontal":
+                if output_image_horizontal_height is None:
+                    output_image_horizontal_height = min(i.height for i in input_images)
+
+                resized_images = [
+                    i.resize((int(i.width * output_image_horizontal_height / i.height), output_image_horizontal_height))
+                    for i in input_images
+                ]
+
+                output_image_width = sum(i.width for i in resized_images)
+
+                output_image = Image.new("RGB", (output_image_width, output_image_horizontal_height), "white")
+
+                x_offset = 0
+                for image in resized_images:
+                    output_image.paste(image, (x_offset, 0))
+                    x_offset += image.width
+
+                output_image.save(output_image_file_path)
+
+            else:
+                return False
+        except Exception as e:  # noqa
+            return False
+        else:
+            return True
 
 
 __all__ = [

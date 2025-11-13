@@ -374,7 +374,11 @@ class _url:
                         file_suffix = os.path.splitext(_file_name)[-1]
 
                 file_name = file_prefix + file_suffix
+            else:
+                dir_path = os.path.abspath(dir_path)
             file_path = os.path.join(dir_path, file_name)
+        else:
+            file_path = os.path.abspath(file_path)
 
         dir_path = os.path.dirname(file_path)
         if not os.path.exists(dir_path):
