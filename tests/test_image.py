@@ -24,6 +24,29 @@ def test_image():
         print(file_path3)
         print(file_path4)
 
+    urls = [
+        "http://images.esgcc.com.cn/images/spu/788C331B24AF68E4082E29DFF12F60A5/341775E2E3B5ADA379E8204CD019D5AC.jpg",
+        "http://images.esgcc.com.cn/images/spu/788C331B24AF68E4082E29DFF12F60A5/F15AF3184BCFBA6738BF4020F00B2C6A.jpg"
+    ]
+    file_paths = []
+    for url in urls:
+        file_path = utils.url.to_file_path(url)
+        print(file_path)
+        if file_path is not None:
+            file_path = utils.image.to_jpg(file_path)
+            print(file_path)
+            if file_path is not None:
+                file_paths.append(file_path)
+
+    file_path = utils.image.concat(
+        file_paths, "5.jpg", orientation="vertical"
+    )
+    print(file_path)
+    file_path = utils.image.concat(
+        file_paths, "6.jpg", orientation="horizontal"
+    )
+    print(file_path)
+
 
 if __name__ == '__main__':
     test_image()

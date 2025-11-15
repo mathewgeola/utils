@@ -2,6 +2,8 @@ import os
 from tempfile import NamedTemporaryFile
 from typing import Literal
 
+import cv2
+import numpy as np
 import pillow_avif  # type: ignore
 from PIL import Image
 
@@ -55,12 +57,20 @@ class _image:
 
             if not keep_original:
                 from pathlib import Path
-                if (p := Path(image_file_path)).exists() and str(p.resolve()) == str(p.absolute()):
+                if (
+                        jpg_file_path != image_file_path and
+                        (p := Path(image_file_path)).exists() and
+                        str(p.resolve()) == str(p.absolute())
+                ):
                     os.remove(image_file_path)
 
             return jpg_file_path
         except Exception as e:  # noqa
             return None
+
+    @staticmethod
+    def resize(image: cv2.typing.MatLike, new_w: int, new_h: int) -> cv2.typing.MatLike:
+        return cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_AREA)
 
     @staticmethod
     def concat(
@@ -71,54 +81,66 @@ class _image:
             output_image_horizontal_height: int | float | None = None
     ) -> bool:
         try:
-            input_images = [Image.open(i) for i in input_image_file_paths]
+            input_images = [cv2.imread(i, cv2.IMREAD_UNCHANGED) for i in input_image_file_paths]
+
+            if any(i is None for i in input_images):
+                return False
 
             if orientation == "vertical":
                 if output_image_vertical_width is None:
-                    output_image_vertical_width = min(i.width for i in input_images)
+                    output_image_vertical_width = min(i.shape[1] for i in input_images)
 
-                resized_images = [
-                    i.resize((output_image_vertical_width, int(i.height * output_image_vertical_width / i.width)))
-                    for i in input_images
-                ]
+                resized_images = []
+                for i in input_images:
+                    h, w = i.shape[:2]
+                    new_w = int(output_image_vertical_width)
+                    new_h = int(h * new_w / w)
+                    resized_image = _image.resize(i, new_w, new_h)
+                    resized_images.append(resized_image)
 
-                output_image_height = sum(i.height for i in resized_images)
+                output_image_height = sum(i.shape[0] for i in resized_images)
 
-                output_image = Image.new("RGB", (output_image_vertical_width, output_image_height), "white")
+                output_image = np.ones((output_image_height, output_image_vertical_width, 3), dtype=np.uint8) * 255
 
-                y_offset = 0
-                for image in resized_images:
-                    output_image.paste(image, (0, y_offset))
-                    y_offset += image.height
+                y = 0
+                for i in resized_images:
+                    h = i.shape[0]
+                    output_image[y:y + h, :i.shape[1]] = i
+                    y += h
 
-                output_image.save(output_image_file_path)
+                cv2.imwrite(output_image_file_path, output_image)
 
             elif orientation == "horizontal":
                 if output_image_horizontal_height is None:
-                    output_image_horizontal_height = min(i.height for i in input_images)
+                    output_image_horizontal_height = min(i.shape[0] for i in input_images)
 
-                resized_images = [
-                    i.resize((int(i.width * output_image_horizontal_height / i.height), output_image_horizontal_height))
-                    for i in input_images
-                ]
+                resized_images = []
+                for i in input_images:
+                    h, w = i.shape[:2]
+                    new_h = int(output_image_horizontal_height)
+                    new_w = int(w * new_h / h)
+                    resized_image = _image.resize(i, new_w, new_h)
+                    resized_images.append(resized_image)
 
-                output_image_width = sum(i.width for i in resized_images)
+                output_image_width = sum(i.shape[1] for i in resized_images)
 
-                output_image = Image.new("RGB", (output_image_width, output_image_horizontal_height), "white")
+                output_image = np.ones((output_image_horizontal_height, output_image_width, 3), dtype=np.uint8) * 255
 
-                x_offset = 0
-                for image in resized_images:
-                    output_image.paste(image, (x_offset, 0))
-                    x_offset += image.width
+                x = 0
+                for i in resized_images:
+                    w = i.shape[1]
+                    output_image[:i.shape[0], x:x + w] = i
+                    x += w
 
-                output_image.save(output_image_file_path)
+                cv2.imwrite(output_image_file_path, output_image)
 
             else:
                 return False
+
+            return True
+
         except Exception as e:  # noqa
             return False
-        else:
-            return True
 
 
 __all__ = [
