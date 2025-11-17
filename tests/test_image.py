@@ -47,6 +47,32 @@ def test_image():
     )
     print(file_path)
 
+    urls = [
+        'http://images.esgcc.com.cn/images/spu/6A0EBD90BAF3DF8C055DC26C7AFC3169/5867DBF6E022A357C9BB3087D06DE8A6.png',
+        'http://images.esgcc.com.cn/images/spu/6A0EBD90BAF3DF8C055DC26C7AFC3169/BCFAA29EF8D487C7C2506AEDECAE35B6.png',
+        'http://images.esgcc.com.cn/images/spu/6A0EBD90BAF3DF8C055DC26C7AFC3169/F5332504375276F6E5035FC153EF0E82.png',
+        'http://images.esgcc.com.cn/images/spu/6A0EBD90BAF3DF8C055DC26C7AFC3169/FC49C25E21007580F639C841FA03492C.png'
+    ]
+
+    file_paths = []
+    for url in urls:
+        file_path = utils.url.to_file_path(url)
+        print(file_path)
+        if file_path is not None:
+            file_path = utils.image.to_jpg(file_path)
+            print(file_path)
+            if file_path is not None:
+                file_paths.append(file_path)
+
+    file_path = utils.image.concat(
+        file_paths, "7.tiff", orientation="vertical"
+    )
+    print(file_path)
+    file_path = utils.image.concat(
+        file_paths, "8.jpg", orientation="horizontal"
+    )
+    print(file_path)
+
 
 if __name__ == '__main__':
     test_image()

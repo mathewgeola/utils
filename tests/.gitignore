@@ -4,6 +4,7 @@
 *.rar
 *.7z
 *.iso
+*.tiff
 
 test_file1/
 test_file2/

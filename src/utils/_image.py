@@ -108,7 +108,7 @@ class _image:
                     output_image[y:y + h, :i.shape[1]] = i
                     y += h
 
-                cv2.imwrite(output_image_file_path, output_image)
+                return cv2.imwrite(output_image_file_path, output_image)
 
             elif orientation == "horizontal":
                 if output_image_horizontal_height is None:
@@ -132,12 +132,10 @@ class _image:
                     output_image[:i.shape[0], x:x + w] = i
                     x += w
 
-                cv2.imwrite(output_image_file_path, output_image)
+                return cv2.imwrite(output_image_file_path, output_image)
 
             else:
                 return False
-
-            return True
 
         except Exception as e:  # noqa
             return False

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cwb-utils"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["mathewgeola <mathewgeola@gmail.com>"]
 readme = "README.md"
 
