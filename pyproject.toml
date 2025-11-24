@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cwb-utils"
-version = "0.1.5"
+version = "0.1.6"
 authors = ["mathewgeola <mathewgeola@gmail.com>"]
 readme = "README.md"
 
@@ -30,6 +30,7 @@ sqlparse = "^0.5.3"
 tqdm = "^4.67.1"
 py7zr = "^1.0.0"
 opencv-python = "^4.12.0.88"
+bs4 = "^0.0.2"
 
 
 [build-system]
