@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cwb-utils"
-version = "0.1.6"
+version = "0.1.7"
 authors = ["mathewgeola <mathewgeola@gmail.com>"]
 readme = "README.md"
 
@@ -9,7 +9,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.12"
+python = ">=3.12,<3.15"
 requests = "^2.32.5"
 httpx = "^0.28.1"
 furl = "^2.1.4"
@@ -31,6 +31,11 @@ tqdm = "^4.67.1"
 py7zr = "^1.0.0"
 opencv-python = "^4.12.0.88"
 bs4 = "^0.0.2"
+drissionpage = "^4.1.1.2"
+oss2 = "^2.19.1"
+flask = "^3.1.2"
+django = "^5.2.8"
+pyinstaller = "^6.17.0"
 
 
 [build-system]
